@@ -1,0 +1,160 @@
+/* author: https://codepen.io/HighFlyer/pen/GRLZYKw Thea */
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	background-color: #000000;
+}
+
+:root {
+	/* Единица для определения размеров */
+	--index: calc(1vw + 1vh);
+	/* --index: 30px; */
+
+	/* Трансформация */
+	--transition: cubic-bezier(0.1, 0.7, 0, 1);
+}
+
+.wrapper {
+	/* Выстраиваем контент по центру */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+
+	/* Запрещаем скролл */
+	overflow: hidden;
+}
+
+.items {
+	display: flex;
+	gap: 0.4rem;
+
+	/* Добавляем перспективу для контейнера обертки, чтобы внутри него работала трасформация по Z оси */
+	perspective: calc(var(--index) * 35);
+}
+
+.item {
+	/* Пропорции размеров 3 на 12 */
+	width: calc(var(--index) * 3);
+	height: calc(var(--index) * 12);
+
+	background-color: #222;
+	background-size: cover;
+	background-position: center;
+	cursor: pointer;
+
+	/* Затемняем изображения */
+	filter: grayscale(1) brightness(0.5);
+
+    /* Указываем в каком порядке и за какое время будут происходить трансформации по ховеру */
+	transition: transform 1.25s var(--transition), filter 3s var(--transition), width 1.25s var(--transition);
+
+	/*
+    CSS свойство will-change предоставляет автору возможность уведомить браузер об ожидаемом изменении элемента,
+    таким образом браузер может настроить соответствующую оптимизацию до того как элемент действительно изменится.
+    Такой тип оптимизации может повысить отзывчивость страницы,
+    совершая, возможно дорогие операции до того как они действительно понадобятся.
+    */
+	will-change: transform, filter, rotateY, width;
+}
+
+/* Поведение по ховеру */
+.items .item:hover {
+    /* Возвращаем цвет */
+	filter: inherit;
+
+    /* Трансформируем по Z оси. Благодаря ранее указанной перспективе на всем контейнере,
+    изображение "увеличивается и уходит в сторону, эффект перспективы"*/
+	transform: translateZ(calc(var(--index) * 10));
+	/* transform: translateZ(300px); */
+}
+
+/* 2. Далее, работаем над тем чтобы ховер работал не только по самой "картинке", но и слева и справа от неё */
+.item::before,
+.item::after {
+	content: '';
+	position: absolute;
+	height: 100%;
+	width: var(--index);
+	right: calc(var(--index) * -1);
+
+    /* Для наглядности */
+    /* background-color: red; */
+}
+
+.item::after {
+	left: calc(var(--index) * -1);
+    /* background-color: green; */
+}
+
+/* 3. Трансформируем блоки справа от "активного" */
+
+/* Первый справа */
+.items .item:hover + * {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 8.5)) rotateY(35deg);
+	z-index: -1;
+}
+
+/* Второй справа */
+.items .item:hover + * + * {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 5.6)) rotateY(40deg);
+	z-index: -2;
+}
+
+/* Третий справа */
+.items .item:hover + * + * + * {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 2.5)) rotateY(30deg);
+	z-index: -3;
+}
+
+/* Четвертый справа */
+.items .item:hover + * + * + * + * {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 0.6)) rotateY(15deg);
+	z-index: -4;
+}
+
+/* 4. Трансформируем блоки слева от "активного" */
+
+/* Первый слева */
+.items .item:has(+ :hover) {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 8.5)) rotateY(-35deg);
+}
+
+
+/* Второй слева */
+.items .item:has(+ * + :hover) {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 5.6)) rotateY(-40deg);
+}
+
+/* Третий слева */
+.items .item:has(+ * + * + :hover) {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 2.5)) rotateY(-30deg);
+}
+
+/* Четвертый слева */
+.items .item:has(+ * + * + * + :hover) {
+	filter: inherit;
+	transform: translateZ(calc(var(--index) * 0.6)) rotateY(-15deg);
+}
+
+/* Раскрываем активный блок по клику */
+.items .item:active,
+.items .item:focus {
+	width: 28vw;
+	filter: inherit;
+	z-index: 100;
+	transform: translateZ(calc(var(--index) * 10));
+	margin: 0 0.45vw;
+}
